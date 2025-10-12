@@ -1,5 +1,9 @@
 use ::core::{
+	cmp::Ordering,
 	fmt,
+	hash::{
+		Hash, Hasher,
+	},
 	ptr::NonNull,
 };
 
@@ -66,5 +70,29 @@ impl<VTable> VTablePtr<VTable> {
 impl<VTable> fmt::Debug for VTablePtr<VTable> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		self.0.fmt(f)
+	}
+}
+
+impl<VTable> PartialEq for VTablePtr<VTable> {
+	fn eq(&self, other: &Self) -> bool {
+		self.0 == other.0
+	}
+}
+impl<VTable> Eq for VTablePtr<VTable> {}
+
+impl<VTable> PartialOrd for VTablePtr<VTable> {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		Some(self.cmp(other))
+	}
+}
+impl<VTable> Ord for VTablePtr<VTable> {
+	fn cmp(&self, other: &Self) -> Ordering {
+		self.0.cmp(&other.0)
+	}
+}
+
+impl<VTable> Hash for VTablePtr<VTable> {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		self.0.hash(state)
 	}
 }
