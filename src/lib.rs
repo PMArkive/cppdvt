@@ -5,6 +5,7 @@
 #![no_std]
 #![allow(clippy::tabs_in_doc_comments)]
 
+#[cfg(feature = "macros")]
 mod macros;
 
 mod vtable_ptr;

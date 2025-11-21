@@ -1,9 +1,13 @@
 [package]
 name = "cppdvt"
-version = "0.6.1"
+version = "0.7.0"
 description = "Utilities for declaring and using C++ virtual function tables"
 authors = ["[aka]bomb"]
 license = "MIT"
 edition = "2021"
+
+[features]
+default = ["macros"]
+macros = []
 
 [dependencies]
