@@ -26,7 +26,9 @@
 macro_rules! virtual_fn {
 	{
 		$(#[$attr:meta])*
-		fn $($name:ident)?($($param:tt)*)
+		fn $($name:ident)?
+		$([$($generic:tt)*])?
+		($($param:tt)*)
 		$($tt:tt)*
 	} => {
 		$crate::if_variadic! {
@@ -34,14 +36,18 @@ macro_rules! virtual_fn {
 				$crate::variadic! {
 					pre = {$(#[$attr])* unsafe extern};
 					post = {
-						fn $($name)?($($param)*) $($tt)*
+						fn $($name)?
+						$(<$($generic)*>)?
+						($($param)*) $($tt)*
 					};
 				}
 			} else {
 				$crate::non_variadic! {
 					pre = {$(#[$attr])* unsafe extern};
 					post = {
-						fn $($name)?($($param)*) $($tt)*
+						fn $($name)?
+						$(<$($generic)*>)?
+						($($param)*) $($tt)*
 					};
 				}
 			}
@@ -75,7 +81,9 @@ macro_rules! virtual_fn {
 macro_rules! unwind_virtual_fn {
 	{
 		$(#[$attr:meta])*
-		fn $($name:ident)?($($param:tt)*)
+		fn $($name:ident)?
+		$([$($generic:tt)*])?
+		($($param:tt)*)
 		$($tt:tt)*
 	} => {
 		$crate::if_variadic! {
@@ -83,14 +91,18 @@ macro_rules! unwind_virtual_fn {
 				$crate::variadic_unwind! {
 					pre = {$(#[$attr])* unsafe extern};
 					post = {
-						fn $($name)?($($param)*) $($tt)*
+						fn $($name)?
+						$(<$($generic)*>)?
+						($($param)*) $($tt)*
 					};
 				}
 			} else {
 				$crate::unwind! {
 					pre = {$(#[$attr])* unsafe extern};
 					post = {
-						fn $($name)?($($param)*) $($tt)*
+						fn $($name)?
+						$(<$($generic)*>)?
+						($($param)*) $($tt)*
 					};
 				}
 			}
