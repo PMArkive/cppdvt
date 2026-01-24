@@ -52,8 +52,17 @@ impl<VTable> VtObject<VTable> {
 	}
 
 	/// Return a pointer that can be used with C++.
-	pub const fn as_ptr(&self) -> VtObjectPtr<VTable> {
+	/// 
+	/// # Safety
+	/// Since [`VtObjectPtr`] does not contain information about the mutability of the pointer,
+	/// it is, generally, Undefined Behavior if `self` gets mutated through it.
+	pub const unsafe fn as_ptr(&self) -> VtObjectPtr<VTable> {
 		unsafe { VtObjectPtr::new_unchecked(self as *const Self as *mut _) }
+	}
+
+	/// Return a pointer that can be used with C++.
+	pub const fn as_mut_ptr(&mut self) -> VtObjectPtr<VTable> {
+		unsafe { VtObjectPtr::new_unchecked(self as *mut Self as *mut _) }
 	}
 
 	/// Return a reference to the object's `VTable`.
