@@ -4,8 +4,20 @@
 /// with the specified arguments, if any.
 #[macro_export]
 macro_rules! virtual_call {
-	($vt_object:expr => $name:ident$(.$name1:ident)*($($arg:tt)*)) => {{
-		let vt_object = &$vt_object;
-		($crate::VtObject::vtable(vt_object).$name$(.$name1)*)($crate::VtObject::as_ptr(vt_object), $($arg)*)
+	(mut $vt_object:expr => $field:ident$(.$suffix:ident)*($($arg:tt)*)) => {{
+		let vt_object = &mut $vt_object;
+		let this = $crate::VtObject::as_mut_ptr(vt_object);
+		($crate::VtObject::vtable(vt_object).$field$(.$suffix)*)(this, $($arg)*)
 	}};
+	($vt_object:expr => $field:ident$(.$suffix:ident)*($($arg:tt)*)) => {{
+		let vt_object = &$vt_object;
+		let this = $crate::VtObject::as_ptr(vt_object);
+		($crate::VtObject::vtable(vt_object).$field$(.$suffix)*)(this, $($arg)*)
+	}};
+
+	($($whatever:tt)*) => {
+		::core::compile_error! {
+			"expected invocation of the form `(mut)? <VtObject> => path.to.func(...)`"
+		}
+	};
 }

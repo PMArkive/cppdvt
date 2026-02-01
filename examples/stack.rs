@@ -62,7 +62,11 @@ impl<T: 'static> VecStack<T> {
 	}
 
 	pub const fn as_object(&self) -> &VtObject<StackVt<T>> {
-		unsafe { VtObject::from_ptr_const(VtObjectPtr::from_ref(&self.vtable)) }
+		unsafe { VtObject::from_ptr(VtObjectPtr::from_ref(&self.vtable)) }
+	}
+
+	pub const fn as_mut_object(&mut self) -> &mut VtObject<StackVt<T>> {
+		unsafe { VtObject::from_ptr_mut(VtObjectPtr::from_mut(&mut self.vtable)) }
 	}
 
 	const VTABLE: &StackVt<T> = &StackVt {
@@ -100,15 +104,20 @@ impl<T: 'static> AsRef<VtObject<StackVt<T>>> for VecStack<T> {
 		self.as_object()
 	}
 }
+impl<T: 'static> AsMut<VtObject<StackVt<T>>> for VecStack<T> {
+	fn as_mut(&mut self) -> &mut VtObject<StackVt<T>> {
+		self.as_mut_object()
+	}
+}
 
-trait Stack<T>: AsRef<VtObject<StackVt<T>>> {
+trait Stack<T>: AsRef<VtObject<StackVt<T>>> + AsMut<VtObject<StackVt<T>>> {
 	fn push(&mut self, value: T) {
 		let value = ManuallyDrop::new(value);
-		unsafe { virtual_call!(self.as_ref() => push(NonNull::from_ref(&value))) }
+		unsafe { virtual_call!(mut self.as_mut() => push(NonNull::from_ref(&value))) }
 	}
 	fn pop_into(&mut self, slot: &mut Option<T>) {
 		let mut value = MaybeUninit::uninit();
-		let is_some = unsafe { virtual_call!(self.as_ref() => pop(NonNull::new_unchecked(value.as_mut_ptr()))) };
+		let is_some = unsafe { virtual_call!(mut self.as_mut() => pop(NonNull::new_unchecked(value.as_mut_ptr()))) };
 		if is_some {
 			unsafe { *slot = Some(value.assume_init()) }
 		}
@@ -122,4 +131,8 @@ trait Stack<T>: AsRef<VtObject<StackVt<T>>> {
 		unsafe { virtual_call!(self.as_ref() => length()) }
 	}
 }
-impl<T, S: ?Sized + AsRef<VtObject<StackVt<T>>>> Stack<T> for S {}
+
+impl<T, S: ?Sized> Stack<T> for S
+where
+	S: AsRef<VtObject<StackVt<T>>> + AsMut<VtObject<StackVt<T>>>,
+{}
