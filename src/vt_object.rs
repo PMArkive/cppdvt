@@ -36,7 +36,7 @@ impl<VTable> VtObject<VTable> {
 	/// 
 	/// # Safety
 	/// The pointer must be valid for the duration of lifetime `'a`.
-	pub const unsafe fn from_ptr_const<'a>(ptr: VtObjectPtr<VTable>) -> &'a Self {
+	pub const unsafe fn from_ptr<'a>(ptr: VtObjectPtr<VTable>) -> &'a Self {
 		unsafe { ptr.cast().as_ref() }
 	}
 
